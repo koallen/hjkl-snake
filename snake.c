@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define DELAY 140000
+#define DELAY 130000
 
 typedef struct {
 	int x_direction;
@@ -15,38 +15,47 @@ typedef struct {
 	int y;
 } Point;
 
-void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available, int, int, bool *);
-void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *food, bool *);
+void MoveSnake(Point *, Direction, int *, Point, bool *, int, int, bool *);
+void GenerateFood(Point *, int, int, int, Point *, bool *);
 
 int main()
 {
 	/*
 	 * initialize ncurses screen
 	 */
-	srand(time(NULL));
 	initscr();
 	noecho();
 	curs_set(FALSE);
 	nodelay(stdscr, TRUE); // don't block on getch() call
-	int max_x = 0, max_y = 0;
+	int max_x, max_y;
 	getmaxyx(stdscr, max_y, max_x); // get window size
+
+	/*
+	 * initialize game
+	 */
+	srand(time(NULL));
+
 	Point *snake = (Point *)malloc(sizeof(Point));
 	int snake_length = 1;
+	bool dead = false;
 	snake[0].x = 0;
 	snake[0].y = 0;
+
 	Direction direction = {0, 0};
 	Point food;
-	bool dead = false;
+	bool food_available = false;
+
 
 	/*
 	 * main loop
 	 */
 	mvprintw(max_y, 0, "Quit the game with 'q'");
-	max_y--;
+	max_y--; // last line reserved for the above instruction
 	mvprintw(snake[0].y, snake[0].x, "o");
-	bool food_available = false;
 	GenerateFood(snake, snake_length, max_x, max_y, &food, &food_available);
+	mvprintw(food.y, food.x, "=");
 	refresh();
+
 	while (1)
 	{
 		char key_stroke = getch();
@@ -72,15 +81,17 @@ int main()
 				goto END;
 				break;
 		}
+
 		clear();
 		mvprintw(max_y, 0, "Quit the game with 'q'");
 		MoveSnake(snake, direction, &snake_length, food, &food_available, max_x, max_y, &dead);
+		// check death
 		if (dead)
 			goto END;
+		// check food
 		if (!food_available)
 			GenerateFood(snake, snake_length, max_x, max_y, &food, &food_available);
-		else
-			mvprintw(food.y, food.x, "=");
+		mvprintw(food.y, food.x, "=");
 		refresh();
 		usleep(DELAY);
 	}
@@ -108,6 +119,7 @@ void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food,
 		return;
 	}
 
+	// detect whether food is eaten by next move
 	if (new_head_x == food.x && new_head_y == food.y)
 	{
 		*food_available = false;
@@ -115,6 +127,7 @@ void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food,
 		snake = realloc(snake, (*snake_length) * sizeof(Point)); // extend the snake by 1
 	}
 
+	// move snake
 	for (int i = *snake_length - 1; i > 0; --i)
 	{
 		snake[i].x = snake[i-1].x;
@@ -132,6 +145,7 @@ void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *f
 {
 	bool food_on_snake = true;
 
+	// generate a food which is not on the body of snake
 	while (food_on_snake)
 	{
 		food->x = rand() % max_x;
@@ -143,5 +157,4 @@ void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *f
 	}
 
 	*food_available = true;
-	mvprintw(food->y, food->x, "=");
 }

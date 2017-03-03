@@ -12,3 +12,6 @@ snake: snake.o
 
 %.o: %.c
 	$(CC) -c $<
+
+clean:
+	rm -f *.o snake

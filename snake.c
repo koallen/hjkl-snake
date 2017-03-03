@@ -18,17 +18,19 @@ int main()
 	noecho();
 	curs_set(FALSE);
 	nodelay(stdscr, TRUE); // don't block on getch() call
-	int max_x, max_y, x = 0, y = 0;
+	int max_x = 0, max_y = 0, x = 0, y = 0;
 	Direction direction = {0, 0};
 
 	/*
 	 * main loop
 	 */
+	getmaxyx(stdscr, max_y, max_x); // get window size
+	mvprintw(max_y, 0, "Quit the game with 'q'");
+	max_y--;
 	mvprintw(y, x, "o");
 	refresh();
 	while (1)
 	{
-		getmaxyx(stdscr, max_y, max_x); // update window border
 		char key_stroke = getch();
 		switch (key_stroke)
 		{
@@ -55,6 +57,7 @@ int main()
 		x = x + direction.x_direction;
 		y = y + direction.y_direction;
 		clear();
+		mvprintw(max_y, 0, "Quit the game with 'q'");
 		mvprintw(y, x, "o");
 		refresh();
 		usleep(DELAY);

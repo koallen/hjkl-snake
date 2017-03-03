@@ -118,6 +118,11 @@ void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food,
 		*dead = true;
 		return;
 	}
+	if (*snake_length > 1 && new_head_x == snake[1].x && new_head_y == snake[1].y)
+	{
+		*dead = true;
+		return;
+	}
 
 	// detect whether food is eaten by next move
 	if (new_head_x == food.x && new_head_y == food.y)

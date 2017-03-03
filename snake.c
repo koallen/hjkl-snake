@@ -15,7 +15,7 @@ typedef struct {
 	int y;
 } Point;
 
-void MoveSnake(Point *snake, Direction direction, int snake_length, Point food, bool *food_available);
+void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available);
 void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *food, bool *);
 
 int main()
@@ -73,7 +73,7 @@ int main()
 		}
 		clear();
 		mvprintw(max_y, 0, "Quit the game with 'q'");
-		MoveSnake(snake, direction, snake_length, food, &food_available);
+		MoveSnake(snake, direction, &snake_length, food, &food_available);
 		if (!food_available)
 			GenerateFood(snake, snake_length, max_x, max_y, &food, &food_available);
 		else
@@ -91,23 +91,31 @@ END:
 	return EXIT_SUCCESS;
 }
 
-void MoveSnake(Point *snake, Direction direction, int snake_length, Point food, bool *food_available)
+void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available)
 {
 	int old_head_x = snake[0].x, old_head_y = snake[0].y;
+	int new_head_x, new_head_y;
+	new_head_x = old_head_x + direction.x_direction;
+	new_head_y = old_head_y + direction.y_direction;
 
-	for (int i = snake_length - 1; i > 0; --i)
+	if (new_head_x == food.x && new_head_y == food.y)
+	{
+		*food_available = false;
+		(*snake_length)++;
+		snake = realloc(snake, (*snake_length) * sizeof(Point)); // extend the snake by 1
+	}
+
+	for (int i = *snake_length - 1; i > 0; --i)
 	{
 		snake[i].x = snake[i-1].x;
 		snake[i].y = snake[i-1].y;
 	}
-	snake[0].x = old_head_x + direction.x_direction;
-	snake[0].y = old_head_y + direction.y_direction;
+	snake[0].x = new_head_x;
+	snake[0].y = new_head_y;
 
-	for (int i = 0; i < snake_length; ++i)
+	for (int i = 0; i < *snake_length; ++i)
 		mvprintw(snake[i].y, snake[i].x, "o");
 
-	if (snake[0].x == food.x && snake[0].y == food.y)
-		*food_available = false;
 }
 
 void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *food, bool *food_available)

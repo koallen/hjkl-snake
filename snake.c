@@ -15,7 +15,7 @@ typedef struct {
 	int y;
 } Point;
 
-void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available);
+void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available, int, int, bool *);
 void GenerateFood(Point *snake, int snake_length, int max_x, int max_y, Point *food, bool *);
 
 int main()
@@ -36,6 +36,7 @@ int main()
 	snake[0].y = 0;
 	Direction direction = {0, 0};
 	Point food;
+	bool dead = false;
 
 	/*
 	 * main loop
@@ -73,7 +74,9 @@ int main()
 		}
 		clear();
 		mvprintw(max_y, 0, "Quit the game with 'q'");
-		MoveSnake(snake, direction, &snake_length, food, &food_available);
+		MoveSnake(snake, direction, &snake_length, food, &food_available, max_x, max_y, &dead);
+		if (dead)
+			goto END;
 		if (!food_available)
 			GenerateFood(snake, snake_length, max_x, max_y, &food, &food_available);
 		else
@@ -91,12 +94,19 @@ END:
 	return EXIT_SUCCESS;
 }
 
-void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available)
+void MoveSnake(Point *snake, Direction direction, int *snake_length, Point food, bool *food_available, int max_x, int max_y, bool *dead)
 {
 	int old_head_x = snake[0].x, old_head_y = snake[0].y;
 	int new_head_x, new_head_y;
 	new_head_x = old_head_x + direction.x_direction;
 	new_head_y = old_head_y + direction.y_direction;
+
+	// detect collision
+	if (new_head_x < 0 || new_head_x > max_x || new_head_y < 0 || new_head_y > max_y)
+	{
+		*dead = true;
+		return;
+	}
 
 	if (new_head_x == food.x && new_head_y == food.y)
 	{

@@ -102,6 +102,7 @@ int main()
 	 */
 END:
 	endwin();
+	free(snake.body);
 
 	return EXIT_SUCCESS;
 }

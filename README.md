@@ -8,10 +8,9 @@
 
 ## Installation
 
-First, install the dependency
+First, install the dependency (macOS has the dependency pre-installed)
 
 ```bash
-$ brew install ncurses # on macOS
 $ sudo apt-get install libncurses5-dev # on Debian/Ubuntu
 ```
 

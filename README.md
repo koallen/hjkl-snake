@@ -1,15 +1,32 @@
 # HJKL Snake
 
-This is a snake game for you to get used to Vim's `HJKL` key binding for cursor movement.
+> A terminal snake game with vim's `HJKL` key bindings. Written purely in C with the ncurses library.
 
-## Dependencies
+## Screenshot
 
-- ncurses
+![hjkl snake screenshot](images/snake.png)
 
-## Compilation
+## Installation
 
-A `Makefile` comes with this project. To compile the game, just run
+First, install the dependency
 
 ```bash
+$ brew install ncurses # on macOS
+$ sudo apt-get install libncurses5-dev # on Debian/Ubuntu
+```
+
+Next, install the game
+
+```bash
+$ git clone https://github.com/koallen/hjkl-snake.git
+$ cd hjkl-snake
 $ make
+```
+
+## Running
+
+After compilation, you can run the game with
+
+```bash
+$ ./snake
 ```

@@ -4,6 +4,8 @@
 #include <time.h>
 
 #define DELAY 130000
+#define SNAKE "O"
+#define FOOD "X"
 
 typedef struct {
 	int x;
@@ -32,8 +34,8 @@ typedef struct {
 	int y;
 } WindowSize;
 
-void MoveSnake(WindowSize, Snake *, Food *);
-void GenerateFood(WindowSize, Snake, Food *);
+void MoveSnake(const WindowSize *, Snake *, Food *);
+void GenerateFood(const WindowSize *, const Snake *, Food *);
 void UpdateDirection(char, Snake *);
 
 int main()
@@ -47,6 +49,8 @@ int main()
 	nodelay(stdscr, TRUE); // don't block on getch() call
 	WindowSize window_size = {0, 0};
 	getmaxyx(stdscr, window_size.y, window_size.x); // get window size
+	window_size.x--;
+	window_size.y--;
 
 	/*
 	 * initialize game
@@ -62,11 +66,11 @@ int main()
 	/*
 	 * main loop
 	 */
-	mvprintw(window_size.y, 0, "Quit the game with 'q'");
-	window_size.y--; // last line reserved for the above instruction
-	mvprintw(snake.body[0].y, snake.body[0].x, "o");
-	GenerateFood(window_size, snake, &food);
-	mvprintw(food.location.y, food.location.x, "=");
+	window_size.y--; // last line reserved for the below instruction
+	mvprintw(window_size.y + 1, 0, "Quit the game with 'q'");
+	mvprintw(snake.body[0].y, snake.body[0].x, SNAKE);
+	GenerateFood(&window_size, &snake, &food);
+	mvprintw(food.location.y, food.location.x, FOOD);
 
 	refresh();
 
@@ -83,15 +87,15 @@ int main()
 
 		clear();
 
-		mvprintw(window_size.y, 0, "Quit the game with 'q'");
-		MoveSnake(window_size, &snake, &food);
+		mvprintw(window_size.y + 1, 0, "Quit the game with 'q'");
+		MoveSnake(&window_size, &snake, &food);
 
 		if (snake.dead)
 			break;
 
 		if (!food.available)
-			GenerateFood(window_size, snake, &food);
-		mvprintw(food.location.y, food.location.x, "=");
+			GenerateFood(&window_size, &snake, &food);
+		mvprintw(food.location.y, food.location.x, FOOD);
 
 		refresh();
 		usleep(DELAY);
@@ -107,7 +111,7 @@ END:
 	return EXIT_SUCCESS;
 }
 
-void MoveSnake(WindowSize window_size, Snake *snake, Food *food)
+void MoveSnake(const WindowSize *window_size, Snake *snake, Food *food)
 {
 	int old_head_x = snake->body[0].x, old_head_y = snake->body[0].y;
 	int new_head_x, new_head_y;
@@ -115,7 +119,7 @@ void MoveSnake(WindowSize window_size, Snake *snake, Food *food)
 	new_head_y = old_head_y + snake->direction.y;
 
 	// detect collision
-	if (new_head_x < 0 || new_head_x > window_size.x || new_head_y < 0 || new_head_y > window_size.y)
+	if (new_head_x < 0 || new_head_x > window_size->x || new_head_y < 0 || new_head_y > window_size->y)
 	{
 		snake->dead = true;
 		return;
@@ -145,20 +149,20 @@ void MoveSnake(WindowSize window_size, Snake *snake, Food *food)
 	snake->body[0].y = new_head_y;
 
 	for (int i = 0; i < snake->length; ++i)
-		mvprintw(snake->body[i].y, snake->body[i].x, "o");
+		mvprintw(snake->body[i].y, snake->body[i].x, SNAKE);
 }
 
-void GenerateFood(WindowSize window_size, Snake snake, Food *food)
+void GenerateFood(const WindowSize *window_size, const Snake *snake, Food *food)
 {
 	bool food_on_snake = true;
 
 	// generate a food which is not on the body of snake
 	while (food_on_snake)
 	{
-		food->location.x = rand() % window_size.x;
-		food->location.y = rand() % window_size.y;
-		for (int i = 0; i < snake.length; ++i)
-			if (food->location.x == snake.body[i].x && food->location.y == snake.body[i].y)
+		food->location.x = rand() % window_size->x;
+		food->location.y = rand() % window_size->y;
+		for (int i = 0; i < snake->length; ++i)
+			if (food->location.x == snake->body[i].x && food->location.y == snake->body[i].y)
 				food_on_snake = true;
 		food_on_snake = false;
 	}
